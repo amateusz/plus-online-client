@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import requests
+
 try:
     from pathlib import Path
 except:
@@ -17,6 +18,7 @@ client = {'id': '',
           'MBamount': -1
           }
 
+
 def read_login_else_write():
     login_file = Path(loginFilename)
     if not login_file.is_file():
@@ -30,6 +32,7 @@ def read_login_else_write():
         with open(login_file, 'r') as file:
             username, password = file.read().splitlines()
     return username, password
+
 
 def main():
     username = None
@@ -54,7 +57,7 @@ def main():
     # make the actuall request 
     result, detailsJson = getDetails(username, token)
     while not result:
-    	# get new token
+        # get new token
         username, password = read_login_else_write()
 
         success = False
@@ -64,11 +67,11 @@ def main():
                 success = True
             except BrokenPipeError:
                 from time import sleep
-                sleep (.8)
+                sleep(.8)
         result, detailsJson = getDetails(username, token)
 
     from datetime import datetime, timedelta
-    activationDate = datetime.fromtimestamp(detailsJson['customerAccount']['expiryDate']/1000)
+    activationDate = datetime.fromtimestamp(detailsJson['customerAccount']['expiryDate'] / 1000)
     activationDate -= timedelta(days=365)
 
     for balance in detailsJson['balances']:
@@ -85,29 +88,33 @@ def main():
 
                     data_plans.append({'valid_for': (activationDate - datetime.now() + timedelta(days=valid_for)).days, \
                                        'remain': package['remain'], \
-                                       'initially': package['all'] })
+                                       'initially': package['all']})
 
             from operator import itemgetter
 
             data_plan_notification_str = []
             for data_plan in (sorted(data_plans, key=itemgetter('valid_for'))):
-            	valid_for_str = str(data_plan['valid_for']).rjust(3) + ' dni:' if data_plan['valid_for'] >1 else ' dzień:'
-            	amounts_str = format(data_plan['remain'], '.1f').replace('.', ',') + ' GB z ' + str(int(round(data_plan['initially']))) +' GB'
-            	print(valid_for_str + '\t' + amounts_str)
-            	data_plan_notification_str.append( format(data_plan['remain'], '.1f').replace('.', ',') + ' GB przez ' + str(data_plan['valid_for']) + ' dni' if data_plan['valid_for'] >1 else ' dzień')
-
-
+                valid_for_str = str(data_plan['valid_for']).rjust(3) + ' dni:' if data_plan[
+                                                                                      'valid_for'] > 1 else ' dzień:'
+                amounts_str = format(data_plan['remain'], '.1f').replace('.', ',') + ' GB z ' + str(
+                    int(round(data_plan['initially']))) + ' GB'
+                print(valid_for_str + '\t' + amounts_str)
+                data_plan_notification_str.append(
+                    format(data_plan['remain'], '.1f').replace('.', ',') + ' GB przez ' + str(
+                        data_plan['valid_for']) + ' dni' if data_plan['valid_for'] > 1 else ' dzień')
 
             sum_remain = sum([_['remain'] for _ in data_plans])
             print('Łącznie w tej chwili masz ' + str(sum_remain).replace('.', ',') + ' GB')
 
             from sys import platform
             if 'linux' in platform.lower():
-            	import notify2
-            	notify2.init('internet komórkowy')
-            	notification = notify2.Notification('Pozostało ' + (('dużo ' + '(' + str(sum_remain) + ' GB)') if sum_remain>5 else 'coś tam mało') + ' internetów', '\n'.join(data_plan_notification_str))
-            	notification.set_category('network')
-            	notification.show()
+                import notify2
+                notify2.init('internet komórkowy')
+                notification = notify2.Notification('Pozostało ' + (
+                    ('dużo ' + '(' + str(sum_remain) + ' GB)') if sum_remain > 5 else 'coś tam mało') + ' internetów',
+                                                    '\n'.join(data_plan_notification_str))
+                notification.set_category('network')
+                notification.show()
 
 
 def authorize(username=None, password=None):
@@ -146,8 +153,8 @@ def authorize(username=None, password=None):
             raise IOError('Provide either user credentials or file with token!')
             # uf there is no file, get them new tokens
 
-def getNewToken(username, password):
 
+def getNewToken(username, password):
     url = {'host': 'https://neti.plus.pl',
            'path': '/neti-rs/login/level23'}
     headers = {'Content-Type': 'application/json',
@@ -169,15 +176,15 @@ def getNewToken(username, password):
         except JSONDecodeError:
             return (False, response.status_code, 'error', 'Wrong credentials')
 
-def getDetails(msisdn, token):
 
+def getDetails(msisdn, token):
     url = {'host': 'https://neti.plus.pl',
            'path': '/neti-rs/startup/xhdpi'}
-    headers = { 'msisdn': msisdn,
-                'authToken': token,
+    headers = {'msisdn': msisdn,
+               'authToken': token,
                'User-Agent': 'Windows tablet'}
 
-    response = requests.get(url = url['host'] + url['path'], headers=headers)
+    response = requests.get(url=url['host'] + url['path'], headers=headers)
     from json import loads
     from json.decoder import JSONDecodeError
     try:
@@ -185,4 +192,10 @@ def getDetails(msisdn, token):
     except JSONDecodeError:
         return (False, 'token doesn\'t work')
 
-main()
+
+if __name__ == '__main__':
+    print('standalone mode')
+    main()
+else:
+    # imported as module
+    pass
