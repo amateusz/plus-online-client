@@ -12,7 +12,12 @@ loginFilename = 'login.txt'
 token = ()
 
 if __name__ == '__main__':
-
+    '''
+    the flow goes like so:
+    the API is callable with a token, but this token seems to have very short lifespan.
+    Therefor realistically we need to store user credentials or ask for them very often.
+    There is no *known* token refresh procedure.
+    '''
     print('standalone mode')
 
     plus = PlusOnlineClient()
