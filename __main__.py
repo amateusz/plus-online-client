@@ -26,14 +26,14 @@ if __name__ == '__main__':
     password = None
     try:
         # check if token file exists
-        token_file = Path(tokenFilename)
+        #token_file = Path(tokenFilename) # seems not used really
         if not token_file.is_file():
             # there is no token file. we need it, but to get it we need to ask for credentials (username + password)
             username, password = plus.read_login_else_write()
-
-        username, token = plus.giveMeToken(username, password)
-        # above will take care of saving if the file doesn't exist or something
-        @TODO: # save token
+            username, token = plus.giveMeToken(username, password)
+        else:
+            token = plus.openTokenFromFile(tokenFilename)
+        plus.saveTokenToFile(tokenFilename)
         # print('---Token istnieje')
     except PermissionError as e:
         print('Cannot authorize!')
