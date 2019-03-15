@@ -56,6 +56,7 @@ if __name__ == '__main__':
         exit(-1)
 
     else:
+        # we have a token here already. it might be broken though
         try:
             summary_str = plus.refreshDetails(token)
         except:

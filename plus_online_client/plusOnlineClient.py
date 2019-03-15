@@ -18,7 +18,11 @@ class PlusOnlineClient():
         pass
 
     def giveMeToken(self, username=None, password=None):
-        """Tries to load long term token from file. If not found takes /username/ and /password/ and generates long term token and saves it in working folder.\nIf no credientials provided and no file is fount, then raises exception."""
+        '''
+        Tries to obtain a new token in exchange for credentials.
+        If it doesn't work → Exception
+        If there is not one → Exception
+        '''
 
         if (username is not None or password is not None) and (username is not '' and password is not ''):
             print('no to zgarniam nowy token')
@@ -49,6 +53,12 @@ class PlusOnlineClient():
         return username, password
 
     def __getNewToken(self, username, password):
+        '''
+        note: token lifetime is,, very low. ~5 minutes
+        :param username:
+        :param password:
+        :return:
+        '''
         url = {'host': 'https://neti.plus.pl',
                'path': '/neti-rs/login/level23'}
         headers = {'Content-Type': 'application/json',
