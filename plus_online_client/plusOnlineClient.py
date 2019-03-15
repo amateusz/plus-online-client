@@ -15,6 +15,7 @@ class PlusOnlineClient():
         self.id = None  # whatever it is
 
     def authenticate(self, token):
+        pass
 
     def giveMeToken(self, username=None, password=None):
         """Tries to load long term token from file. If not found takes /username/ and /password/ and generates long term token and saves it in working folder.\nIf no credientials provided and no file is fount, then raises exception."""
@@ -25,32 +26,13 @@ class PlusOnlineClient():
             if tokenResult[0] == True:
                 # obtained correct token
                 token = tokenResult[1]
-                try:
-                    tokenFile = open(tokenFilename, 'w')
-                    # tokenFile.write(token[0] + '\n' + token[1])
-                    tokenFile.write('\n'.join([username, token]))
-                    tokenFile.close()
-                    return (username, token)
-                except:
-                    raise
-                    # error writing token to file.
+                return token
             else:
                 if tokenResult[1] == 500:
                     raise BrokenPipeError
                 else:
                     raise PermissionError('Wrong credientals!')
                 # exit(-1)  # no stored token found and getting new token failed
-        else:
-            try:
-                tokenFile = open(tokenFilename, 'r')
-                username, token = tokenFile.read().splitlines()
-                tokenFile.close()
-                return (username, token)
-            except FileNotFoundError:
-                raise FileNotFoundError('Creating \"' + tokenFilename + '\"')
-            except IOError:
-                raise IOError('Provide either user credentials or file with token!')
-                # uf there is no file, get them new tokens
 
     def read_login_else_write(self):
         login_file = Path(loginFilename)
@@ -96,6 +78,8 @@ class PlusOnlineClient():
                    'User-Agent': 'Windows tablet'}
 
         response = requests.get(url=url['host'] + url['path'], headers=headers)
+        if response.status_code == 401:
+            return (False, 'token properly expired')
         from json import loads
         from json.decoder import JSONDecodeError
         try:
@@ -151,7 +135,7 @@ class PlusOnlineClient():
                 return data_plans
 
     def openTokenFromFile(self, location):
-        tokenFile = open(tokenFilename, 'r')
+        tokenFile = open(location, 'r')
         token = tuple([_ for _ in tokenFile.read().splitlines()])
         tokenFile.close()
         return token
