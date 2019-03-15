@@ -12,6 +12,7 @@ loginFilename = 'login.txt'
 token = ()
 
 if __name__ == '__main__':
+
     print('standalone mode')
 
     plus = PlusOnlineClient()
@@ -25,9 +26,9 @@ if __name__ == '__main__':
             # there is no token file. we need it, but to get it we need to ask for credentials (username + password)
             username, password = plus.read_login_else_write()
 
-        username, token = plus.authorize(username, password)
+        username, token = plus.giveMeToken(username, password)
         # above will take care of saving if the file doesn't exist or something
-
+        @TODO: # save token
         # print('---Token istnieje')
     except PermissionError as e:
         print('Cannot authorize!')
@@ -35,7 +36,28 @@ if __name__ == '__main__':
         exit(-1)
 
     else:
-        summary_str = plus.refreshDetails(token)
+
+        # bash against
+        while not result:
+            try:
+                summary_str = plus.refreshDetails(token)
+            except ConnectionError:
+
+
+            # get new token
+            username, password = self.read_login_else_write()
+            success = False
+            while not success:
+                # this shitty API glitches and requires banging
+                try:
+                    self.number, token = self.giveMeToken(username, password)
+                    success = True
+                except BrokenPipeError:
+                    from time import sleep
+
+                    sleep(.8)
+            result, detailsJson = self.getDetails(token)  # i don't like this duplicatin, but…
+
 
         print('Łącznie w tej chwili masz ' + str(plus.getGBamount()).replace('.', ',') + ' GB')
 

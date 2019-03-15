@@ -14,7 +14,9 @@ class PlusOnlineClient():
         self.number = None
         self.id = None  # whatever it is
 
-    def authorize(self, username=None, password=None):
+    def authenticate(self, token):
+
+    def giveMeToken(self, username=None, password=None):
         """Tries to load long term token from file. If not found takes /username/ and /password/ and generates long term token and saves it in working folder.\nIf no credientials provided and no file is fount, then raises exception."""
 
         if (username is not None or password is not None) and (username is not '' and password is not ''):
@@ -86,7 +88,7 @@ class PlusOnlineClient():
             except JSONDecodeError:
                 return (False, response.status_code, 'error', 'Wrong credentials')
 
-    def getDetails(self, token):
+    def getContractData(self, token):
         url = {'host': 'https://neti.plus.pl',
                'path': '/neti-rs/startup/xhdpi'}
         headers = {'msisdn': self.number,
@@ -103,22 +105,9 @@ class PlusOnlineClient():
 
     def refreshDetails(self, token):
         # make the actuall request
-        result, detailsJson = self.getDetails(token)
-
-        # bash against
-        while not result:
-            # get new token
-            username, password = self.read_login_else_write()
-            success = False
-            while not success:
-                # this shitty API glitches and requires banging
-                try:
-                    self.number, token = self.authorize(username, password)
-                    success = True
-                except BrokenPipeError:
-                    from time import sleep
-                    sleep(.8)
-            result, detailsJson = self.getDetails(token)  # i don't like this duplicatin, but…
+        result, detailsJson = self.getContractData(token)
+        if not result:
+            raise ConnectionError
 
         self.data_plans = self.parseDetails(detailsJson)
 
