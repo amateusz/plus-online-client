@@ -88,7 +88,7 @@ class PlusOnlineClient():
     def getContractData(self, token):
         url = {'host': 'https://neti.plus.pl',
                'path': '/neti-rs/startup/xhdpi'}
-        headers = {'msisdn': self.number,
+        headers = {'msisdn': str(self.number),
                    'authToken': token,
                    'User-Agent': 'Windows tablet'}
 
@@ -106,7 +106,7 @@ class PlusOnlineClient():
         # make the actuall request
         result, detailsJson = self.getContractData(token)
         if not result:
-            raise ConnectionError
+            raise ConnectionError(detailsJson)
 
         self.data_plans = self.parseDetails(detailsJson)
 
@@ -148,6 +148,16 @@ class PlusOnlineClient():
                              'remain': package['remain'], \
                              'initially': package['all']})
                 return data_plans
+
+    def setMsisdn(self, msisdn):
+        try:
+            sanitized = int(msisdn)
+            if len(str(msisdn)) != 9:
+                raise ValueError  # as well (as above)
+        except ValueError:
+            print('niepoprawna wartość MSISDN (numeru telefonu). Podaj 9 cyfr.')
+        else:
+            self.number = sanitized
 
     def openTokenFromFile(self, location):
         tokenFile = open(location, 'r')

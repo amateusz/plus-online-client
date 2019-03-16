@@ -51,7 +51,7 @@ if __name__ == '__main__':
             plus.saveTokenToFile((username, token), tokenFilename)
         else:
             try:
-                plus.number, token = plus.openTokenFromFile(tokenFilename)
+                username, token = plus.openTokenFromFile(tokenFilename)
             except FileNotFoundError:
                 raise FileNotFoundError('Creating \"' + tokenFilename + '\"')
             except IOError:
@@ -59,6 +59,7 @@ if __name__ == '__main__':
                 # uf there is no file, get them new tokens
             # else:
             # here we have loaded a token. does it work
+        plus.setMsisdn(username)
         try:
             # verification
             summary_str = plus.refreshDetails(token)
