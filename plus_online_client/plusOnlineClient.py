@@ -1,5 +1,10 @@
 import requests
 
+try:
+    from pathlib import Path
+except:
+    from pathlib2 import Path
+
 
 class PlusOnlineClient():
     client = {'id': '',
@@ -38,8 +43,8 @@ class PlusOnlineClient():
                     raise PermissionError('Wrong credientals!')
                 # exit(-1)  # no stored token found and getting new token failed
 
-    def read_login_else_write(self):
-        login_file = Path(loginFilename)
+    def read_login_else_write(self, location):
+        login_file = Path(location)
         if not login_file.is_file():
             # there  even isn't login file. ask for these details
             username = input('Podaj login: ')

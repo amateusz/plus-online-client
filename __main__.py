@@ -5,6 +5,7 @@ try:
     from pathlib import Path
 except:
     from pathlib2 import Path
+from os import remove
 
 tokenFilename = 'token.txt'
 loginFilename = 'login.txt'
@@ -24,23 +25,30 @@ if __name__ == '__main__':
 
     username = None
     password = None
-    try:
+    # get token
+    token_valid = False
+    while not token_valid:
         # check if token file exists
         token_file = Path(tokenFilename)
         if not token_file.is_file():
             # there is no token file. we need it, but to get it we need to ask for credentials (username + password)
-            username, password = plus.read_login_else_write()
+            username, password = plus.read_login_else_write(loginFilename)
             success = False
             while not success:
                 # this shitty API glitches and requires banging
                 try:
-                    plus.number, token = plus.giveMeToken(username, password)
+                    token = plus.giveMeToken(username, password)
                     success = True
                 except BrokenPipeError:
                     from time import sleep
 
                     sleep(.8)
-            plus.saveTokenToFile(token, tokenFilename)
+                # print('---Token istnieje')
+                except PermissionError as e:
+                    print('Cannot authorize!')
+                    print(e)
+                    exit(-1)
+            plus.saveTokenToFile((username, token), tokenFilename)
         else:
             try:
                 plus.number, token = plus.openTokenFromFile(tokenFilename)
@@ -49,35 +57,39 @@ if __name__ == '__main__':
             except IOError:
                 raise IOError('Provide either user credentials or file with token!')
                 # uf there is no file, get them new tokens
-        # print('---Token istnieje')
-    except PermissionError as e:
-        print('Cannot authorize!')
-        print(e)
-        exit(-1)
-
-    else:
-        # we have a token here already. it might be broken though
+            # else:
+            # here we have loaded a token. does it work
         try:
+            # verification
             summary_str = plus.refreshDetails(token)
-        except:
-            raise
+        except ConnectionError as e:
+            from sys import stderr
+
+            print(e, file=stderr)
+            # delete current token file, as it's invalid
+            remove(token_file)
+            # let's keep repeating the loop
         else:
-            # get new token
+            # got new token and it works
+            token_valid = True
 
-            print('Łącznie w tej chwili masz ' + str(plus.getGBamount()).replace('.', ',') + ' GB')
+        # else:
+    # we have a token here already. it might be broken though
 
-            from sys import platform
+    print('Łącznie w tej chwili masz ' + str(plus.getGBamount()).replace('.', ',') + ' GB')
 
-            if 'linux' in platform.lower():
-                import notify2
+    from sys import platform
 
-                notify2.init('internet komórkowy')
-                notification = notify2.Notification('Pozostało ' + (
-                    ('dużo ' + '(' + str(
-                        plus.getGBamount()) + ' GB)') if plus.getGBamount() > 5 else 'coś tam mało') + ' internetów',
-                                                    '\n'.join([_['summary'] for _ in plus.data_plans]))
-                notification.set_category('network')
-                notification.show()
+    if 'linux' in platform.lower():
+        import notify2
+
+        notify2.init('internet komórkowy')
+        notification = notify2.Notification('Pozostało ' + (
+            ('dużo ' + '(' + str(
+                plus.getGBamount()) + ' GB)') if plus.getGBamount() > 5 else 'coś tam mało') + ' internetów',
+                                            '\n'.join([_['summary'] for _ in plus.data_plans]))
+        notification.set_category('network')
+        notification.show()
 else:
     # imported as module
     pass
