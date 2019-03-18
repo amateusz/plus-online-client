@@ -9,7 +9,7 @@ except:
 
 
 class PlusOnlineClient():
-    friendly_color = 'green'
+    friendly_color = '#2FAB34'
     friendly_name = 'Plus'
     client = {'id': '',
               'msisdn': -1,
