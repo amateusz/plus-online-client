@@ -184,7 +184,7 @@ class PlusOnlineClient():
 
     def getGBamount(self, total=True):
         if total:
-            return sum([float(_['remain']) for _ in self.data_plans])
+            return Data_Amount(sum([float(_['remain']) for _ in self.data_plans]))
         else:
             return [_['remain'] for _ in self.data_plans]
             # lamda to extract data amoun  # lamda to extract data amount

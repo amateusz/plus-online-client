@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='plus-online-client',
-    version='1.3',
+    version='1.3.1',
     packages=find_packages(),
     # packages=[''],
     url='https://github.com/amateusz/plus-online-client',
