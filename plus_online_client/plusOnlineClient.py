@@ -1,5 +1,7 @@
 import requests
 
+from plus_online_client.dataAmount import Data_Amount
+
 try:
     from pathlib import Path
 except:
@@ -116,12 +118,11 @@ class PlusOnlineClient():
         from operator import itemgetter
         for data_plan in (sorted(self.data_plans, key=itemgetter('valid_for'))):
             valid_for_str = str(data_plan['valid_for']).rjust(3) + ' dni:' if data_plan['valid_for'] > 1 else ' dzień:'
-            amounts_out_of_str = format(data_plan['remain'], '.1f').replace('.', ',') + ' GB z ' + str(
-                int(round(data_plan['initially']))) + ' GB'
+            amounts_out_of_str = str(data_plan['remain']) + ' z ' + str(data_plan['initially'])
 
             summary = valid_for_str + '\t' + amounts_out_of_str
 
-            summary_str = format(data_plan['remain'], '.1f').replace('.', ',') + ' GB przez ' + str(
+            summary_str = str(data_plan['remain']) + ' przez ' + str(
                 data_plan['valid_for']) + ' dni' if data_plan['valid_for'] > 1 else ' dzień'
 
             # summary_formatted.append(summary_str)
@@ -148,8 +149,8 @@ class PlusOnlineClient():
 
                         data_plans.append(
                             {'valid_for': (activationDate - datetime.now() + timedelta(days=valid_for)).days, \
-                             'remain': package['remain'], \
-                             'initially': package['all']})
+                             'remain': Data_Amount(package['remain']), \
+                             'initially': Data_Amount(package['all'])})
                 return data_plans
 
     def setMsisdn(self, msisdn):
@@ -183,7 +184,7 @@ class PlusOnlineClient():
 
     def getGBamount(self, total=True):
         if total:
-            return sum([_['remain'] for _ in self.data_plans])
+            return sum([float(_['remain']) for _ in self.data_plans])
         else:
             return [_['remain'] for _ in self.data_plans]
             # lamda to extract data amoun  # lamda to extract data amount
