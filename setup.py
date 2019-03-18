@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='plus-online-client',
-    version='1.0',
+    version='1.1',
     packages=find_packages(),
     # packages=[''],
     url='https://github.com/amateusz/plus-online-client',
@@ -11,7 +11,7 @@ setup(
     author='amateusz',
     author_email='grzywomat@gmail.com',
     description='connect with Plus GSM API and fetch data plan details',
-    requires=[
+    install_requires=[
         'notify2'
     ]
 )

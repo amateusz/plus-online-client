@@ -35,6 +35,7 @@ class PlusOnlineClient():
             if tokenResult[0] == True:
                 # obtained correct token
                 token = tokenResult[1]
+                self.setMsisdn(username)
                 return token
             else:
                 if tokenResult[1] == 500:
